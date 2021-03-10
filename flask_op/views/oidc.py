@@ -27,7 +27,7 @@ def registration_endpoint():
         response = current_app.provider.handle_client_registration_request(flask.request.get_data().decode('utf-8'))
         return make_response(jsonify(response.to_dict()), 201)
     except InvalidClientRegistrationRequest as e:
-        return make_response(jsonify(e.to_dict()), status=400)
+        return make_response(e.to_json(), 400)
 
 
 @oidc_provider_views.route('/authorize', methods=['GET'])
@@ -68,7 +68,7 @@ def token_endpoint():
                                                                    flask.request.headers)
         return jsonify(token_response.to_dict())
     except InvalidClientAuthentication as e:
-        current_app.logger.debug('invalid client authentication at token endpoint', exc_info=True)
+        current_app.logger.error('!!!!!!!!!!! invalid client authentication at token endpoint', exc_info=True)
         error_resp = TokenErrorResponse(error='invalid_client', error_description=str(e))
         response = make_response(error_resp.to_json(), 401)
         response.headers['Content-Type'] = 'application/json'
