@@ -2,6 +2,7 @@ import datetime
 import time
 from urllib.parse import urlencode, parse_qs
 
+import colors
 import flask
 from flask import Blueprint, redirect, request, g
 from flask import current_app
@@ -16,7 +17,7 @@ from pyop.exceptions import InvalidAuthenticationRequest, InvalidAccessToken, In
 from pyop.util import should_fragment_encode
 from rfc3339 import rfc3339
 
-from sqlauthenticator import SQLAuthenticator
+from flask_op.sqlauthenticator import SQLAuthenticator
 
 oidc_provider_views = Blueprint('oidc_provider', __name__, url_prefix='')
 
@@ -30,8 +31,9 @@ def index():
 def log_request_info():
     g.start = time.time()
 
+
 @oidc_provider_views.after_request
-def log_request(response, colors=None):
+def log_request(response):
     if request.path == '/favicon.ico':
         return response
     elif request.path.startswith('/static'):
@@ -66,7 +68,7 @@ def log_request(response, colors=None):
         part = colors.color("{}={}".format(name, value), fg=color)
         parts.append(part)
     line = " ".join(parts)
-    current_app.logger("#############################################################################")
+    current_app.logger.info("#############################################################################")
     current_app.logger.info(line)
 
     return response
@@ -131,7 +133,7 @@ def token_endpoint():
                                                                    flask.request.headers)
         return jsonify(token_response.to_dict())
     except InvalidClientAuthentication as e:
-        current_app.logger.error('!!!!!!!!!!! invalid client authentication at token endpoint', exc_info=True)
+        current_app.logger.error('invalid client authentication at token endpoint', exc_info=True)
         error_resp = TokenErrorResponse(error='invalid_client', error_description=str(e))
         response = make_response(error_resp.to_json(), 401)
         response.headers['Content-Type'] = 'application/json'

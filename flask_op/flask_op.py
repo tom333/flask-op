@@ -54,7 +54,7 @@ def init_oidc_provider(app):
     clients = {
         "clientapp1": {
             "client_secret": "secret1",
-            "redirect_uris": ["http://localhost:5000/test_auth_callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
+            "redirect_uris": ["http://localhost:5000/test_auth_callback","http://localhost:5000/callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
             "response_types": ["code"],
         },
 
@@ -76,7 +76,9 @@ def init_oidc_provider(app):
 
 def create_app(config_file):
     app = Flask("flask_op")
+    app.secret_key = "my super secrete key!"
     app.config.from_pyfile(config_file)
+
     app.users = {'test_user': {'name': 'Testing Name', "website": "None",
               "zoneinfo": "None",
               "birthdate": "2000-01-01",
@@ -104,8 +106,8 @@ def create_app(config_file):
     session = Session()
     session.init_app(app)
 
-    login_manager = LoginManager()
-    login_manager.init_app(app)
+    # login_manager = LoginManager()
+    # login_manager.init_app(app)
 
     @app.errorhandler(404)
     def resource_not_found(e):
