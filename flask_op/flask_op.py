@@ -1,6 +1,8 @@
 import logging
 
 from flask import Flask, url_for, jsonify
+from flask_login import LoginManager
+from flask_session import Session
 from jwkest.jwk import RSAKey, rsa_load
 from pyop.authz_state import AuthorizationState
 from pyop.provider import Provider
@@ -99,6 +101,12 @@ def create_app(config_file):
     app.provider = init_oidc_provider(app)
     app.logger.error(app.url_map)
 
+    session = Session()
+    session.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
     @app.errorhandler(404)
     def resource_not_found(e):
         return jsonify(error=str(e)), 404
@@ -109,4 +117,5 @@ def create_app(config_file):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     app = create_app("config.py")
+    app.logger.setLevel(logging.DEBUG)
     app.run()
