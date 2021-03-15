@@ -9,70 +9,47 @@ from pyop.provider import Provider
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
-from flask_op.sqlwrapper import SQLWrapper
+from flask_op.model import ClientRPSQLWrapper, UserSQLWrapper
 
 
 def init_oidc_provider(app):
     with app.app_context():
-        issuer = url_for('oidc_provider.index')[:-1]
-        authentication_endpoint = url_for('oidc_provider.authentication_endpoint')
-        jwks_uri = url_for('oidc_provider.jwks_uri')
-        token_endpoint = url_for('oidc_provider.token_endpoint')
-        userinfo_endpoint = url_for('oidc_provider.userinfo_endpoint')
-        registration_endpoint = url_for('oidc_provider.registration_endpoint')
-        end_session_endpoint = url_for('oidc_provider.end_session_endpoint')
+        issuer = url_for("oidc_provider.index")[:-1]
+        authentication_endpoint = url_for("oidc_provider.authentication_endpoint")
+        jwks_uri = url_for("oidc_provider.jwks_uri")
+        token_endpoint = url_for("oidc_provider.token_endpoint")
+        userinfo_endpoint = url_for("oidc_provider.userinfo_endpoint")
+        registration_endpoint = url_for("oidc_provider.registration_endpoint")
+        end_session_endpoint = url_for("oidc_provider.end_session_endpoint")
 
     configuration_information = {
-        'issuer': issuer,
-        'authorization_endpoint': authentication_endpoint,
-        'jwks_uri': jwks_uri,
-        'token_endpoint': token_endpoint,
-        'userinfo_endpoint': userinfo_endpoint,
-        'registration_endpoint': registration_endpoint,
-        'end_session_endpoint': end_session_endpoint,
-        'scopes_supported': ['openid', 'profile', 'email'],
-        'response_types_supported': ['code', 'code id_token', 'code token', 'code id_token token'],  # code and hybrid
-        'response_modes_supported': ['query', 'fragment'],
-        'grant_types_supported': ['authorization_code', 'implicit'],
-        'subject_types_supported': ['pairwise'],
-        'token_endpoint_auth_methods_supported': ['client_secret_basic', 'private_key_jwt'],
-        'userinfo_signing_alg_values_supported': ["RS256"]
-        'claims_parameter_supported': True,
-        'claims_supported': ["sub",
-                              "name",
-                              "given_name",
-                              "family_name",
-                              "middle_name",
-                              "nickname",
-                              "profile",
-                              "picture",
-                              "website",
-                              "gender",
-                              "birthdate",
-                              "zoneinfo",
-                              "locale",
-                              "updated_at",
-                              "preferred_username"],
-    }
-    clients = {
-        "clientapp1": {
-            "client_secret": "secret1",
-            "redirect_uris": ["http://localhost:5000/test_auth_callback","http://localhost:5000/callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
-            "response_types": ["code"],
-        },
-
-        "clientapp2": {
-            "client_secret": "secret2",
-            "redirect_uris": ["http://localhost:5000/test_auth_callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
-            "response_types": ["code"],
-        }
+        "issuer": issuer,
+        "authorization_endpoint": authentication_endpoint,
+        "jwks_uri": jwks_uri,
+        "token_endpoint": token_endpoint,
+        "userinfo_endpoint": userinfo_endpoint,
+        "registration_endpoint": registration_endpoint,
+        "end_session_endpoint": end_session_endpoint,
+        "scopes_supported": app.config["OIDC_SCOPES_SUPPORTED"],
+        "response_types_supported": app.config["OIDC_RESPONSE_TYPES_SUPPORTED"],
+        "response_modes_supported": app.config["OIDC_RESPONSE_MODES_SUPPORTED"],
+        "grant_types_supported": app.config["OIDC_GRANT_TYPES_SUPPORTED"],
+        "subject_types_supported": app.config["OIDC_SUBJECT_TYPE_SUPPORTED"],
+        "token_endpoint_auth_methods_supported": app.config["OIDC_TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED"],
+        "userinfo_signing_alg_values_supported": app.config["OIDC_USERINFO_SIGNING_ALG_VALUES_SUPPORTED"],
+        "claims_parameter_supported": app.config["OIDC_CLAIMS_PARAMETER_SUPPORTED"],
+        "claims_supported": app.config["OIDC_CLAIMS_SUPPORTED"],
     }
 
     userinfo_db = Userinfo(app.sql_backend)
-    signing_key = RSAKey(key=rsa_load('keys/signing_key.pem'), alg='RS256', kid="toto")
-    provider = Provider(signing_key, configuration_information,
-                        AuthorizationState(HashBasedSubjectIdentifierFactory(app.config['SUBJECT_ID_HASH_SALT'])),
-                        clients, userinfo_db)
+    signing_key = RSAKey(key=rsa_load(app.config["SIGNING_KEY_FILE"]), alg=app.config["SIGNING_KEY_ALG"], kid=app.config["SIGNING_KEY_ID"])
+    provider = Provider(
+        signing_key,
+        configuration_information,
+        AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])),
+        ClientRPSQLWrapper(),
+        userinfo_db,
+    )
 
     return provider
 
@@ -81,7 +58,8 @@ def create_app(config_file):
     app = Flask("flask_op")
     app.config.from_pyfile(config_file)
 
-    from flask_op.views.oidc import oidc_provider_views
+    from flask_op.views import oidc_provider_views
+
     app.register_blueprint(oidc_provider_views)
 
     toolbar = DebugToolbarExtension()
@@ -90,7 +68,7 @@ def create_app(config_file):
     sess = Session()
     sess.init_app(app)
 
-    sql_backend = SQLWrapper()
+    sql_backend = UserSQLWrapper()
     sql_backend.init_app(app)
 
     # Initialize the oidc_provider after views to be able to set correct urls
@@ -104,7 +82,7 @@ def create_app(config_file):
     return app
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    app = create_app("config.py")
-    app.run()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    flask_op_app = create_app("config.py")
+    flask_op_app.run()
