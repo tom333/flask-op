@@ -1,5 +1,6 @@
 FROM python:3.8-slim
-RUN pip3 install poetry gunicorn
+
+RUN pip3 install poetry
 WORKDIR /app
 COPY pyproject.toml poetry.lock /app/
 RUN poetry config virtualenvs.create false && poetry install
