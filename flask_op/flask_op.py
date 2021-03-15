@@ -1,13 +1,15 @@
 import logging
 
 from flask import Flask, url_for, jsonify
-from flask_login import LoginManager
+from flask_debugtoolbar import DebugToolbarExtension
 from flask_session import Session
 from jwkest.jwk import RSAKey, rsa_load
 from pyop.authz_state import AuthorizationState
 from pyop.provider import Provider
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
+
+from flask_op.sqlwrapper import SQLWrapper
 
 
 def init_oidc_provider(app):
@@ -34,6 +36,7 @@ def init_oidc_provider(app):
         'grant_types_supported': ['authorization_code', 'implicit'],
         'subject_types_supported': ['pairwise'],
         'token_endpoint_auth_methods_supported': ['client_secret_basic', 'private_key_jwt'],
+        'userinfo_signing_alg_values_supported': ["RS256"]
         'claims_parameter_supported': True,
         'claims_supported': ["sub",
                               "name",
@@ -65,7 +68,7 @@ def init_oidc_provider(app):
         }
     }
 
-    userinfo_db = Userinfo(app.users)
+    userinfo_db = Userinfo(app.sql_backend)
     signing_key = RSAKey(key=rsa_load('keys/signing_key.pem'), alg='RS256', kid="toto")
     provider = Provider(signing_key, configuration_information,
                         AuthorizationState(HashBasedSubjectIdentifierFactory(app.config['SUBJECT_ID_HASH_SALT'])),
@@ -76,38 +79,23 @@ def init_oidc_provider(app):
 
 def create_app(config_file):
     app = Flask("flask_op")
-    app.secret_key = "my super secrete key!"
     app.config.from_pyfile(config_file)
-
-    app.users = {'test_user': {'name': 'Testing Name', "website": "None",
-              "zoneinfo": "None",
-              "birthdate": "2000-01-01",
-              "gender": "None",
-              "profile": "None",
-              "preferred_username": "None",
-              "given_name": "None",
-              "middle_name": "None",
-              "locale": "None",
-              "picture": "None",
-              "updated_at": 1615351682,
-              "nickname": "None",
-              "family_name": "None",
-              "email_verified": True,
-              "email": "test@test.com"
-                               }}
 
     from flask_op.views.oidc import oidc_provider_views
     app.register_blueprint(oidc_provider_views)
 
+    toolbar = DebugToolbarExtension()
+    toolbar.init_app(app)
+
+    sess = Session()
+    sess.init_app(app)
+
+    sql_backend = SQLWrapper()
+    sql_backend.init_app(app)
+
     # Initialize the oidc_provider after views to be able to set correct urls
     app.provider = init_oidc_provider(app)
     app.logger.error(app.url_map)
-
-    session = Session()
-    session.init_app(app)
-
-    # login_manager = LoginManager()
-    # login_manager.init_app(app)
 
     @app.errorhandler(404)
     def resource_not_found(e):
@@ -119,5 +107,4 @@ def create_app(config_file):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     app = create_app("config.py")
-    app.logger.setLevel(logging.DEBUG)
     app.run()

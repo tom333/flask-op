@@ -6,20 +6,20 @@ from flask import Flask, jsonify
 from flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
 from flask_pyoidc.user_session import UserSession
-from werkzeug.utils import redirect
+
 
 app = Flask(__name__)
 # See http://flask.pocoo.org/docs/0.12/config/
 app.config.update({'OIDC_REDIRECT_URI': 'http://localhost:5000/callback',
-                   'SECRET_KEY': 'dev_key',  # make sure to change this!!
+                   'SECRET_KEY': 'dev_key',
                    'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
                    'DEBUG': True})
 
-ISSUER1 = 'https://localhost:8000'
+ISSUER = 'https://localhost:8000'
 CLIENT1 = 'clientapp1'
 PROVIDER_NAME = 'flask_op'
-auth_params = {'scope': ['openid', 'profile']}
-PROVIDER_CONFIG = ProviderConfiguration(issuer=ISSUER1,
+auth_params = {'scope': ['openid', 'profile', 'adress']}
+PROVIDER_CONFIG = ProviderConfiguration(issuer=ISSUER,
                                         client_metadata=ClientMetadata(CLIENT1, 'secret1'),
                                         auth_request_params=auth_params)
 auth = OIDCAuthentication({PROVIDER_NAME: PROVIDER_CONFIG,})
@@ -27,7 +27,7 @@ auth = OIDCAuthentication({PROVIDER_NAME: PROVIDER_CONFIG,})
 
 @app.route('/')
 @auth.oidc_auth(PROVIDER_NAME)
-def login1():
+def login():
     user_session = UserSession(flask.session)
     return jsonify(access_token=user_session.access_token,
                    id_token=user_session.id_token,
@@ -38,7 +38,6 @@ def login1():
 @auth.oidc_logout
 def logout():
     return "You've been successfully logged out!"
-
 
 
 @auth.error_view
