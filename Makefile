@@ -20,3 +20,7 @@ docker-image:
 clean:
 	find . -name "__pychache__" -exec rm -Rf {} \;
 	find . -name "*.pyc" -exec rm -f {} \;
+
+
+quality:
+	python -m black flask_op
