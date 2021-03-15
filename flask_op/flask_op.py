@@ -31,35 +31,19 @@ def init_oidc_provider(app):
         "userinfo_endpoint": userinfo_endpoint,
         "registration_endpoint": registration_endpoint,
         "end_session_endpoint": end_session_endpoint,
-        "scopes_supported": ["openid", "profile", "email"],
-        "response_types_supported": ["code", "code id_token", "code token", "code id_token token"],  # code and hybrid
-        "response_modes_supported": ["query", "fragment"],
-        "grant_types_supported": ["authorization_code", "implicit"],
-        "subject_types_supported": ["pairwise"],
-        "token_endpoint_auth_methods_supported": ["client_secret_basic", "private_key_jwt"],
-        "userinfo_signing_alg_values_supported": ["RS256"],
-        "claims_parameter_supported": True,
-        "claims_supported": [
-            "sub",
-            "name",
-            "given_name",
-            "family_name",
-            "middle_name",
-            "nickname",
-            "profile",
-            "picture",
-            "website",
-            "gender",
-            "birthdate",
-            "zoneinfo",
-            "locale",
-            "updated_at",
-            "preferred_username",
-        ],
+        "scopes_supported": app.config["OIDC_SCOPES_SUPPORTED"],
+        "response_types_supported": app.config["OIDC_RESPONSE_TYPES_SUPPORTED"],
+        "response_modes_supported": app.config["OIDC_RESPONSE_MODES_SUPPORTED"],
+        "grant_types_supported": app.config["OIDC_GRANT_TYPES_SUPPORTED"],
+        "subject_types_supported": app.config["OIDC_SUBJECT_TYPE_SUPPORTED"],
+        "token_endpoint_auth_methods_supported": app.config["OIDC_TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED"],
+        "userinfo_signing_alg_values_supported": app.config["OIDC_USERINFO_SIGNING_ALG_VALUES_SUPPORTED"],
+        "claims_parameter_supported": app.config["OIDC_CLAIMS_PARAMETER_SUPPORTED"],
+        "claims_supported": app.config["OIDC_CLAIMS_SUPPORTED"],
     }
 
     userinfo_db = Userinfo(app.sql_backend)
-    signing_key = RSAKey(key=rsa_load("keys/signing_key.pem"), alg="RS256", kid="toto")
+    signing_key = RSAKey(key=rsa_load(app.config["SIGNING_KEY_FILE"]), alg=app.config["SIGNING_KEY_ALG"], kid=app.config["SIGNING_KEY_ID"])
     provider = Provider(signing_key, configuration_information, AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])), ClientRPSQLWrapper(), userinfo_db)
 
     return provider
@@ -95,5 +79,5 @@ def create_app(config_file):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    app = create_app("config.py")
-    app.run()
+    flask_op_app = create_app("config.py")
+    flask_op_app.run()
