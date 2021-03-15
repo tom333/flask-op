@@ -1,4 +1,5 @@
 # Application client
+Relying party for test server
 
 ## launch with : 
-`CURL_CA_BUNDLE="" FLASK_APP=app_rp.py flask run`
+`CURL_CA_BUNDLE="" python app_rp.py`

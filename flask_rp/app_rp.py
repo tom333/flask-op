@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, url_for, session
 from flask import render_template, redirect
 from authlib.integrations.flask_client import OAuth
@@ -17,7 +19,7 @@ oauth.register(
         'scope': 'openid email profile adress'
     },
     client_id="clientapp1",
-    client_secret = "secret1"
+    client_secret="secret1"
 )
 
 
@@ -45,3 +47,8 @@ def callback():
 def logout():
     session.pop('user', None)
     return redirect('/')
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    app.run()
