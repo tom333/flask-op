@@ -1,4 +1,4 @@
-from flask_op.models import User
+from flask_op.model.models import User
 from flask import current_app
 
 user_test = User("test_user")

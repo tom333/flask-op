@@ -9,8 +9,7 @@ from pyop.provider import Provider
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
-from flask_op.ClientRPSQLWrapper import ClientRPSQLWrapper
-from flask_op.usersqlwrapper import UserSQLWrapper
+from flask_op.model import ClientRPSQLWrapper, UserSQLWrapper
 
 
 def init_oidc_provider(app):
@@ -59,7 +58,7 @@ def create_app(config_file):
     app = Flask("flask_op")
     app.config.from_pyfile(config_file)
 
-    from flask_op.views.oidc import oidc_provider_views
+    from flask_op.views import oidc_provider_views
 
     app.register_blueprint(oidc_provider_views)
 

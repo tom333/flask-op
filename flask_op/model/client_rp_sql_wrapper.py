@@ -1,6 +1,6 @@
 from flask import current_app
 
-from flask_op.models import OidcRP
+from flask_op.model.models import OidcRP
 
 client1 = OidcRP(
     "clientapp1",
