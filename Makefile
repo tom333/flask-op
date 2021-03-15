@@ -1,5 +1,5 @@
 run:
-	gunicorn "flask_op.flask_op:create_app('config.py')" -b :8000 --certfile keys/local.crt --keyfile keys/local.key # run the application
+	gunicorn "flask_op.flask_op:create_app('config.py')" -b :8000 --certfile keys/local.crt --keyfile keys/local.key --reload
 
 
 generate-keys:
@@ -16,3 +16,7 @@ generate-keys:
 
 docker-image:
 	docker build -t flask_op:latest -f docker/Dockerfile .
+
+clean:
+	find . -name "__pychache__" -exec rm -Rf {} \;
+	find . -name "*.pyc" -exec rm -f {} \;
