@@ -23,3 +23,17 @@ class User(dict):
                 "email": "test@test.com",
             }
         )
+
+
+class OidcRP(dict):
+    def __init__(self, client_id, client_secret=None, redirect_uris=[], response_types=[]) -> None:
+        super().__init__()
+        self.update(
+            {
+                client_id: {
+                    "client_secret": client_secret,
+                    "redirect_uris": redirect_uris,
+                    "response_types": response_types,
+                }
+            }
+        )

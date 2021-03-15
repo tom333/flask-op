@@ -9,7 +9,8 @@ from pyop.provider import Provider
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
-from flask_op.sqlwrapper import SQLWrapper
+from flask_op.ClientRPSQLWrapper import ClientRPSQLWrapper
+from flask_op.usersqlwrapper import UserSQLWrapper
 
 
 def init_oidc_provider(app):
@@ -56,22 +57,10 @@ def init_oidc_provider(app):
             "preferred_username",
         ],
     }
-    clients = {
-        "clientapp1": {
-            "client_secret": "secret1",
-            "redirect_uris": ["http://localhost:5000/test_auth_callback", "http://localhost:5000/callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
-            "response_types": ["code"],
-        },
-        "clientapp2": {
-            "client_secret": "secret2",
-            "redirect_uris": ["http://localhost:5000/test_auth_callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
-            "response_types": ["code"],
-        },
-    }
 
     userinfo_db = Userinfo(app.sql_backend)
     signing_key = RSAKey(key=rsa_load("keys/signing_key.pem"), alg="RS256", kid="toto")
-    provider = Provider(signing_key, configuration_information, AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])), clients, userinfo_db)
+    provider = Provider(signing_key, configuration_information, AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])), ClientRPSQLWrapper(), userinfo_db)
 
     return provider
 
@@ -90,7 +79,7 @@ def create_app(config_file):
     sess = Session()
     sess.init_app(app)
 
-    sql_backend = SQLWrapper()
+    sql_backend = UserSQLWrapper()
     sql_backend.init_app(app)
 
     # Initialize the oidc_provider after views to be able to set correct urls
