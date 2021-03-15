@@ -1,9 +1,10 @@
 #Flask OpenId Provider
 
 
-## Implementented
-- TODO Basic OP https://openid.net/specs/openid-connect-core-1_0.html
-- TODO Dynamic / Discovery
+## Implemented
+- WIP: Basic OP https://openid.net/specs/openid-connect-core-1_0.html
+- WIP: Discovery
+- TODO: Dynamic 
   
 
 
