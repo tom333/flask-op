@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scope claims</title>
+</head>
+<body>
+The app {{app_name}} claims access to this scope:
+{{scope}}
+<form method="POST" action="/consent?{{ args }}">
+    <button type="submit" name="submit" value="ok">Tout accepter</button>
+</form>
+
+</body>
+</html>

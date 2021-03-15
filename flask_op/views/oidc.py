@@ -17,8 +17,6 @@ from pyop.exceptions import InvalidAuthenticationRequest, InvalidAccessToken, In
 from pyop.util import should_fragment_encode
 from rfc3339 import rfc3339
 
-from flask_op.sqlauthenticator import SQLAuthenticator
-
 oidc_provider_views = Blueprint('oidc_provider', __name__, url_prefix='')
 
 
@@ -85,35 +83,44 @@ def registration_endpoint():
 
 @oidc_provider_views.route('/authorize', methods=['GET', 'POST'])
 def authentication_endpoint():
-    if request.method == 'GET':
-        # parse authentication request
-        try:
-            auth_req = current_app.provider.parse_authentication_request(urlencode(flask.request.args),
-                                                                         flask.request.headers)
-            flask.session['auth_req'] = auth_req
-        except InvalidAuthenticationRequest as e:
-            current_app.logger.debug('received invalid authn request', exc_info=True)
-            error_url = e.to_error_url()
-            if error_url:
-                return redirect(error_url, 303)
-            else:
-                # show error to user
-                return make_response('Something went wrong: {}'.format(str(e)), 400)
-        return render_template('login.jinja2')
-    else:
-        if 'auth_req' not in flask.session:
-            return make_response('Could not get the authentication request from the session', 400)
-        auth_req = flask.session['auth_req']
-
-        auth_provider = SQLAuthenticator()
-        if auth_provider.authenticate({'username': flask.request.form['username'],
-                                       'password': flask.request.form['password']}):
-
-            authn_response = current_app.provider.authorize(auth_req, flask.request.form['username'])
-            response_url = authn_response.request(auth_req['redirect_uri'], should_fragment_encode(auth_req))
+    try:
+        auth_req = current_app.provider.parse_authentication_request(urlencode(flask.request.args),
+                                                                     flask.request.headers)
+        flask.session['auth_req'] = auth_req
+    except InvalidAuthenticationRequest as e:
+        current_app.logger.debug('received invalid authn request', exc_info=True)
+        error_url = e.to_error_url()
+        if error_url:
+            return redirect(error_url, 303)
         else:
-            response_url = '{0}?error=access_denied&state={1}'.format(auth_req['redirect_uri'], auth_req['state'])
-        return redirect(response_url, 303)
+            return make_response('Something went wrong: {}'.format(str(e)), 400)
+    return render_template('login.jinja2', args=request.query_string)
+
+
+@oidc_provider_views.route("/log_user", methods=['POST'])
+def log_user():
+    auth_provider = current_app.sql_backend
+    if auth_provider.authenticate({'username': flask.request.form['username'],
+                                   'password': flask.request.form['password']}):
+        current_app.logger.debug("authentification de l'utlisateur")
+        authn_response = current_app.provider.authorize(flask.session['auth_req'], flask.request.form['username'])
+        current_app.logger.debug("authn_response %s " % authn_response)
+        flask.session['authn_response'] = authn_response
+
+        current_app.logger.debug(request.args.keys())
+        if not auth_provider.user_have_constented_scope(request.args.get('scope')):
+
+            return render_template('scope_claims.jinja2', app_name=request.args.get('client_id'),
+                                   scope=request.args.get('scope'), args=request.query_string)
+    response_url = flask.session['authn_response'].request(flask.session['auth_req']['redirect_uri'], should_fragment_encode(flask.session['auth_req']))
+    return redirect(response_url, 303)
+
+
+@oidc_provider_views.route("/consent", methods=['POST'])
+def consent():
+    response_url = flask.session['authn_response'].request(flask.session['auth_req']['redirect_uri'],
+                                                           should_fragment_encode(flask.session['auth_req']))
+    return redirect(response_url, 303)
 
 
 @oidc_provider_views.route('/.well-known/openid-configuration')

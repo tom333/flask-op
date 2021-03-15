@@ -1,5 +1,5 @@
 from flask_op.models import User
-
+from flask import current_app
 user_test = User("test_user")
 
 
@@ -7,8 +7,9 @@ class SQLWrapper(object):
     def authenticate(self, param):
         return True
 
-    def find_by_login(self, login):
-        return user_test
+    def user_have_constented_scope(self, scopes):
+        current_app.logger.debug(scopes)
+        return False
 
     def init_app(self, app):
         app.sql_backend= self

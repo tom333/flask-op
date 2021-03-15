@@ -2,7 +2,7 @@
 <title>Login</title>
 
 login
-<form method="POST" action="/authorize">
+<form method="POST" action="/log_user?{{args}}">
     <input type="text" name="username" value="test_user"/>
     <input type="password" name="password"/>
     <button type="submit" name="submit" value="submit">Authenticate</button>
