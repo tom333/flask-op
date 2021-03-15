@@ -4,7 +4,7 @@ from flask import current_app
 user_test = User("test_user")
 
 
-class SQLWrapper(object):
+class UserSQLWrapper(object):
     def authenticate(self, param):
         return True
 
