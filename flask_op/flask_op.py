@@ -44,7 +44,13 @@ def init_oidc_provider(app):
 
     userinfo_db = Userinfo(app.sql_backend)
     signing_key = RSAKey(key=rsa_load(app.config["SIGNING_KEY_FILE"]), alg=app.config["SIGNING_KEY_ALG"], kid=app.config["SIGNING_KEY_ID"])
-    provider = Provider(signing_key, configuration_information, AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])), ClientRPSQLWrapper(), userinfo_db)
+    provider = Provider(
+        signing_key,
+        configuration_information,
+        AuthorizationState(HashBasedSubjectIdentifierFactory(app.config["SUBJECT_ID_HASH_SALT"])),
+        ClientRPSQLWrapper(),
+        userinfo_db,
+    )
 
     return provider
 

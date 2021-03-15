@@ -5,7 +5,11 @@ from flask_op.models import OidcRP
 client1 = OidcRP(
     "clientapp1",
     client_secret="secret1",
-    redirect_uris=["http://localhost:5000/test_auth_callback", "http://localhost:5000/callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
+    redirect_uris=[
+        "http://localhost:5000/test_auth_callback",
+        "http://localhost:5000/callback",
+        "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback",
+    ],
     response_types=["code"],
 )
 client2 = OidcRP(

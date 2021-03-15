@@ -12,7 +12,14 @@ from flask.templating import render_template
 from oic.oic.message import TokenErrorResponse, UserInfoErrorResponse, EndSessionRequest
 
 from pyop.access_token import AccessToken, BearerTokenError
-from pyop.exceptions import InvalidAuthenticationRequest, InvalidAccessToken, InvalidClientAuthentication, OAuthError, InvalidSubjectIdentifier, InvalidClientRegistrationRequest
+from pyop.exceptions import (
+    InvalidAuthenticationRequest,
+    InvalidAccessToken,
+    InvalidClientAuthentication,
+    OAuthError,
+    InvalidSubjectIdentifier,
+    InvalidClientRegistrationRequest,
+)
 from pyop.util import should_fragment_encode
 from rfc3339 import rfc3339
 
@@ -107,14 +114,20 @@ def log_user():
         current_app.logger.debug(request.args.keys())
         if not auth_provider.user_have_constented_scope(request.args.get("scope")):
 
-            return render_template("scope_claims.jinja2", app_name=request.args.get("client_id"), scope=request.args.get("scope"), args=request.query_string)
-    response_url = flask.session["authn_response"].request(flask.session["auth_req"]["redirect_uri"], should_fragment_encode(flask.session["auth_req"]))
+            return render_template(
+                "scope_claims.jinja2", app_name=request.args.get("client_id"), scope=request.args.get("scope"), args=request.query_string
+            )
+    response_url = flask.session["authn_response"].request(
+        flask.session["auth_req"]["redirect_uri"], should_fragment_encode(flask.session["auth_req"])
+    )
     return redirect(response_url, 303)
 
 
 @oidc_provider_views.route("/consent", methods=["POST"])
 def consent():
-    response_url = flask.session["authn_response"].request(flask.session["auth_req"]["redirect_uri"], should_fragment_encode(flask.session["auth_req"]))
+    response_url = flask.session["authn_response"].request(
+        flask.session["auth_req"]["redirect_uri"], should_fragment_encode(flask.session["auth_req"])
+    )
     return redirect(response_url, 303)
 
 
