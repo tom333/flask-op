@@ -20,5 +20,10 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
-      - name: Convert pyprojet.toml to dependencies.txt
+      - name: Convert pyprojet.toml to requirements.txt
         run: poetry export -f requirements.txt --output requirements.txt
+      - id: deploy
+        uses: google-github-actions/deploy-appengine@main
+        with:
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
