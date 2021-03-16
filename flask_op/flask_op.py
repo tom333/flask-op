@@ -62,9 +62,6 @@ def create_app(config_file):
 
     app.register_blueprint(oidc_provider_views)
 
-    toolbar = DebugToolbarExtension()
-    toolbar.init_app(app)
-
     sess = Session()
     sess.init_app(app)
 
