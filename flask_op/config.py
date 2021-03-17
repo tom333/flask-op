@@ -1,10 +1,11 @@
-SERVER_NAME = "localhost:8000"
+SERVER_NAME = "plated-mantis-303721.ts.r.appspot.com"
+#SERVER_NAME = "localhost:8000"
 SUBJECT_ID_HASH_SALT = "secret_salt"
 PREFERRED_URL_SCHEME = "https"
 DEBUG = True
 SECRET_KEY = "secret_key"
 SESSION_TYPE = "filesystem"
-
+SESSION_FILE_DIR = "/tmp/flask_sessions"
 
 OIDC_SCOPES_SUPPORTED = ["openid", "profile", "email"]
 OIDC_RESPONSE_TYPES_SUPPORTED = ["code", "code id_token", "code token", "code id_token token"]  # code and hybrid

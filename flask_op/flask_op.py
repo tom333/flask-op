@@ -1,7 +1,6 @@
 import logging
 
 from flask import Flask, url_for, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_session import Session
 from jwkest.jwk import RSAKey, rsa_load
 from pyop.authz_state import AuthorizationState
@@ -77,9 +76,3 @@ def create_app(config_file):
         return jsonify(error=str(e)), 404
 
     return app
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    flask_op_app = create_app("config.py")
-    flask_op_app.run()
