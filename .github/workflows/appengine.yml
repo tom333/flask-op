@@ -1,6 +1,9 @@
 name: Deploy on Google App Engine
 
-on: push
+on:
+  push
+    branches:
+      - master
 
 jobs:
   deploy_on_app_engine:
