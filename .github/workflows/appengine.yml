@@ -4,7 +4,7 @@ on:
   push
     branches:
       - master
-
+Name: Google App Engine Deployment
 jobs:
   deploy_on_app_engine:
     strategy:
