@@ -1,0 +1,32 @@
+name: Deploy on Google App Engine
+
+on:
+  push
+    branches:
+      - master
+
+jobs:
+  deploy_on_app_engine:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ 3.8 ]
+        poetry-version: [ 1.1.2 ]
+        os: [ ubuntu-18.04 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: Convert pyprojet.toml to requirements.txt
+        run: poetry export -f requirements.txt --output requirements.txt
+      - id: deploy
+        uses: google-github-actions/deploy-appengine@main
+        with:
+          credentials: ${{ secrets.GCP_SA_KEY }}
+

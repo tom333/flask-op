@@ -9,13 +9,15 @@ client1 = OidcRP(
         "http://localhost:5000/test_auth_callback",
         "http://localhost:5000/callback",
         "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback",
+        "https://www.certification.openid.net/test/a/test/callback",
     ],
     response_types=["code"],
 )
 client2 = OidcRP(
     "clientapp2",
     client_secret="secret2",
-    redirect_uris=["http://localhost:5000/test_auth_callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback"],
+    redirect_uris=["http://localhost:5000/test_auth_callback", "https://localhost.emobix.co.uk:8443/test/a/test_discovery_endpoint/callback",
+                   "https://www.certification.openid.net/test/a/test/callback"],
     response_types=["code"],
 )
 
