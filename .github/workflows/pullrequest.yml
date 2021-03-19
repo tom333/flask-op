@@ -28,4 +28,4 @@ jobs:
       - name: Run tests
         run: poetry run pytest --cache-clear --cov=flask_op -cov-report xml:cov.xml --cov-report term-missing tests/ > pytest-coverage.txt
       - name: Comment coverage
-          uses: coroo/pytest-coverage-commentator@v1.0.2
+        uses: coroo/pytest-coverage-commentator@v1.0.2
