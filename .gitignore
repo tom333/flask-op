@@ -3,3 +3,6 @@ __pycache__
 *.pyc
 
 flask_session
+.coverage
+cov.xml
+pytest-coverage.txt
