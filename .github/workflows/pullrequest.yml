@@ -1,10 +1,14 @@
 on:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request.
   push:
     branches:
       - master
-name: Google App Engine Deployment
+  pull_request:
+      types: [opened, synchronize, reopened]
+name: Main Workflow
 jobs:
-  deploy_on_app_engine:
+  analyse_pull_request:
     strategy:
       fail-fast: false
       matrix:
@@ -21,10 +25,7 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
-      - name: Convert pyprojet.toml to requirements.txt
-        run: poetry export -f requirements.txt --output requirements.txt
-      - id: deploy
-        uses: google-github-actions/deploy-appengine@main
-        with:
-          credentials: ${{ secrets.GCP_SA_KEY }}
-
+      - name: Run tests
+        run: poetry install && poetry run pytest --cache-clear --cov=flask_op --cov-report xml:cov.xml --cov-report term-missing tests/ > pytest-coverage.txt
+      - name: Comment coverage
+        uses: coroo/pytest-coverage-commentator@v1.0.2
