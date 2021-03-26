@@ -4,11 +4,8 @@ ports:
   - port: 8000
     onOpen: open-preview
 tasks:
-  - init: >
-      python3 -m pip install poetry
-      poetry install
-    command:
-      gunicorn "flask_op.flask_op:create_app('config.py')" -b :8000 --certfile keys/local.crt --keyfile keys/local.key --reload
+  - init: poetry install
+    command: gunicorn "flask_op.flask_op:create_app('config.py')" -b :8000 --reload
 
 vscode:
   extensions:

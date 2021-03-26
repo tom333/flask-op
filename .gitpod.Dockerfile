@@ -1,4 +1,6 @@
 FROM gitpod/workspace-full
 
-RUN python -m install poetry
+USER gitpod
+
+RUN python -m pip install poetry
 RUN poetry config virtualenvs.create false
