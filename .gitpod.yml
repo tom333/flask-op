@@ -1,0 +1,13 @@
+image:
+  file: .gitpod.Dockerfile
+ports:
+  - port: 8000
+    onOpen: open-preview
+tasks:
+  - init: poetry install
+    command: gunicorn "flask_op.flask_op:create_app('config.py')" -b :8000 --reload
+
+vscode:
+  extensions:
+    - ms-python.python@2020.10.332292344:5ctthQ25Qni5/aAuOIUTYQ==
+    - ms-ceintl.vscode-language-pack-fr@1.55.1:wCAB1RiaZBabV3+NGW9Ddw==
