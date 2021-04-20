@@ -12,11 +12,16 @@
 
 
 ## Implemented
-- WIP: Basic OP https://openid.net/specs/openid-connect-core-1_0.html
-- WIP: Discovery
-- TODO: Dynamic 
+- [X] Basic OP https://openid.net/specs/openid-connect-core-1_0.html
+  - [X] Authorization code flow
+  - [X] Implicit code flow
+  - [X] Hybrid code flow
+- [X] Discovery https://openid.net/specs/openid-connect-discovery-1_0.html
+- [X] Dynamic registration https://openid.net/specs/openid-connect-registration-1_0.html
+- [X] Logout
   
-
+## Results
+https://www.certification.openid.net/plan-detail.html?plan=bGbKdOAblicED&public=true
 
 ## Conformance test locally
 https://gitlab.com/openid/conformance-suite/-/wikis/Developers/Build-&-Run
