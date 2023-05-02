@@ -10,7 +10,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 pyop = "^3.1.0"
-Flask = "^1.1.2"
+Flask = "^2.3.2"
 oic = "1.2.1"
 ansicolors = "^1.1.8"
 rfc3339 = "^6.2"
